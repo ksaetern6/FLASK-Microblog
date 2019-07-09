@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, flash, redirect, url_for
 from app import app
 from app.forms import LoginForm
 
@@ -23,10 +23,25 @@ def index():
     return render_template('index.html', title='Home', user=user, posts=posts)
 ##
 # login view
+# 
 ##
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    #create form object and passed into render_template.
-    #form on the left is the template and form on the right is created from LoginForm
+    # create form object and passed into render_template.
+    # form on the left is the template and form on the right is created from 
+    # LoginForm
     form = LoginForm()
+    ##
+    # if statement does the form processing.
+    # GET request to receive the web page with the login form is going to 
+    # return False and skip the if statement and render the form.
+    # A POST request from pressing the submit button gathers the data and
+    # runs the validators attached to the fields.
+    # flash() shows a msg to the user and returns a redirect back to index.
+    ## 
+    if form.validate_on_submit():
+        #Edited base.html to allow flash to appear in Flask.
+        flash('Login requested for user {}, remember_me={}'.format(
+            form.username.data, form.remember_me.data))
+        return redirect(url_for('index'))
     return render_template('login.html', title='Sign In', form=form)
