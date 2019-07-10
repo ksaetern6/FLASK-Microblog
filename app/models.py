@@ -1,3 +1,4 @@
+from datetime import datetime
 from app import db
 
 class User(db.Model):
@@ -5,7 +6,22 @@ class User(db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
+    posts = db.relationship('Post', backref='author', lazy='dynamic')
 
     #tells Python how to print objects of this class, for debugging.
     def __repr__(self):
         return '<User {}>'.format(self.username)
+##
+# @type class
+# @name Post
+# @desc blog posts written by users
+##
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.String(140))
+    #default lets SQLAlchemy set the field to the value of calling that function.
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    def __repr__(self):
+        return 'Post {}>'.format(self.body)
