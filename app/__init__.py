@@ -23,4 +23,4 @@ login = LoginManager(app)
 #view to require users to login to view a page
 login.login_view = 'login'
 
-from app import routes, models
+from app import routes, models, errors
