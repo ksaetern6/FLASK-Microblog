@@ -116,7 +116,7 @@ def before_request():
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
-    form = EditProfileForm()
+    form = EditProfileForm(current_user.username)
     # if form returns True, data gets transffered into the user object and 
     # saved into the db
     if form.validate_on_submit():

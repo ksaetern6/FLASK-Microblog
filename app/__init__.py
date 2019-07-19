@@ -1,5 +1,6 @@
 import logging
-from logging.handlers import SMTPHandler
+import os
+from logging.handlers import SMTPHandler, RotatingFileHandler
 from flask import Flask
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
@@ -45,5 +46,27 @@ if not app.debug: #if not in debug mode
             credentials=auth, secure=secure)
         mail_handler.setLevel(logging.ERROR) #only errors reported
         app.logger.addHandler(mail_handler)
+
+##
+# LOG FILE HANDLING
+##
+if not app.debug:
+    #writing/creating log to logs dir
+    if not os.path.exists('logs'):
+        os.mkdir('logs')
+    #RotatingFileHandler limits log files to 10KB and keeps last 10 as backup
+    file_handler = RotatingFileHandler('logs/microblog.log', maxBytes=10240,
+                                        backupCount=10)
+    #logging.Formatter sets the format for the log messages.
+    #includes timestamp, logging level, message, and src file and line number
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+    #logging level set to INFO category. 
+    #DEBUG > INFO > WARNING > ERROR > CRITICA
+    file_handler.setLevel(logging.INFO)
+    app.logger.addHandler(file_handler)
+
+    app.logger.setLevel(logging.INFO)
+    app.logger.info('Microblog startup')
 
 from app import routes, models, errors
