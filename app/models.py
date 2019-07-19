@@ -60,6 +60,27 @@ class User(UserMixin, db.Model):
         return self.followed.filter(
             followers.c.followed.id == user.id).count() > 0 
     ##
+    # @name: followed_post
+    # @desc: 
+    ##
+    def followed_posts(self):
+        #joining Post table with 'followers' being the association table
+        #and the second argument is the join condition --
+        #(followers.c.followed_id == Post.user_id)
+        #This join creates a temp table with combined data from Posts table
+        #and followers table.
+        return Post.query.join(
+            #condition says followed_id of followers table must be equal to 
+            #user_id of posts table.
+            
+            #filter selects the user_id(self.id) of the current User.
+            #we are only getting posts this user follows from the temp table. 
+            followers, (followers.c.followed_id == Post.user_id)).filter(
+               #order_by sorts the posts by the most recent post.
+                 followers.c.follower_id == self.id).order_by(
+                    Post.timestamp.desc())
+
+    ##
     # @name: set_password
     # @desc: creates a hash of a given string and stores it in the object
     ##
