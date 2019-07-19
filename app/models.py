@@ -61,7 +61,8 @@ class User(UserMixin, db.Model):
             followers.c.followed.id == user.id).count() > 0 
     ##
     # @name: followed_post
-    # @desc: 
+    # @desc: Creates temp table from Posts and uses User's id to filter table
+    #   so the table only displays posts followed by the user.
     ##
     def followed_posts(self):
         #joining Post table with 'followers' being the association table
@@ -76,9 +77,10 @@ class User(UserMixin, db.Model):
             #filter selects the user_id(self.id) of the current User.
             #we are only getting posts this user follows from the temp table. 
             followers, (followers.c.followed_id == Post.user_id)).filter(
-               #order_by sorts the posts by the most recent post.
-                 followers.c.follower_id == self.id).order_by(
-                    Post.timestamp.desc())
+                 followers.c.follower_id == self.id)
+            #the user's own posts that are unioned with the temp table of posts
+            own = Post.query.filter_by(user_id=self.id)
+            return followed.union(own).order_by(Post.timestamp.desc())
 
     ##
     # @name: set_password
