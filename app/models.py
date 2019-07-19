@@ -4,6 +4,16 @@ from app import db, login
 from flask_login import UserMixin
 from hashlib import md5
 
+
+##
+# @desc: Followers Association Table, not declared as a model because
+#   the table has no data other than foreign keys.
+##
+followers = db.Table('followers',
+    db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
+)
+
 ##
 # @type: class
 # @name: User
@@ -19,6 +29,36 @@ class User(UserMixin, db.Model):
     #User Profile fields 
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    #Many-to-Many followers relationship
+    followed = db.relationship(
+        'User', secondary=followers,
+        primaryjoin=(followers.c.follower_id == id),
+        secondaryjoin=(followers.c.followed_id == id),
+        backref=db.backref('followers', lazy='dynamic'), lazy='dynamic')
+    ##
+    # @name: follow
+    # @desc: uses relationship/application methods to add user to following list
+    ##
+    def follow(self, user):
+        if not self.is_following(user):
+            self.followed.append(user)
+    ##
+    # @name: unfollow
+    # @desc: uses relationship/application methods to remove user from
+    #   following list.
+    ##
+    def unfollow(self, user):
+        if self.is_following(user):
+            self.followed.remove(user)
+    ##
+    # @name: is_following
+    # @desc: checks if following link exists in the database, returns 0 or 1
+    #
+    ##
+    def is_following(self, user):
+        return self.followed.filter(
+            followers.c.followed.id == user.id).count() > 0 
     ##
     # @name: set_password
     # @desc: creates a hash of a given string and stores it in the object
@@ -68,3 +108,4 @@ class Post(db.Model):
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
+
