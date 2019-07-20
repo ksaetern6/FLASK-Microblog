@@ -58,7 +58,7 @@ class User(UserMixin, db.Model):
     ##
     def is_following(self, user):
         return self.followed.filter(
-            followers.c.followed.id == user.id).count() > 0 
+            followers.c.followed_id == user.id).count() > 0 
     ##
     # @name: followed_post
     # @desc: Creates temp table from Posts and uses User's id to filter table
@@ -70,7 +70,7 @@ class User(UserMixin, db.Model):
         #(followers.c.followed_id == Post.user_id)
         #This join creates a temp table with combined data from Posts table
         #and followers table.
-        return Post.query.join(
+        followed = Post.query.join(
             #condition says followed_id of followers table must be equal to 
             #user_id of posts table.
             
@@ -79,8 +79,8 @@ class User(UserMixin, db.Model):
             followers, (followers.c.followed_id == Post.user_id)).filter(
                  followers.c.follower_id == self.id)
             #the user's own posts that are unioned with the temp table of posts
-            own = Post.query.filter_by(user_id=self.id)
-            return followed.union(own).order_by(Post.timestamp.desc())
+        own = Post.query.filter_by(user_id=self.id)
+        return followed.union(own).order_by(Post.timestamp.desc())
 
     ##
     # @name: set_password
@@ -105,7 +105,7 @@ class User(UserMixin, db.Model):
     ##
     def avatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
-        return 'https:www.gravatar.com/avatar/{}?id=identicon&s={}'.format(
+        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
             digest, size)
     
     #tells Python how to print objects of this class, for debugging.

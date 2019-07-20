@@ -1,4 +1,10 @@
-start flask: flask run
-start flask database migrate: 
-    flask db migrate
-    flask db upgrade
+
+START FLASK: 
+$ flask run
+
+START FLASK DATABASE MIGRATION: 
+$ flask db migrate
+$ flask db upgrade
+
+RUN UNIT-TESTS
+$ python tests.py
