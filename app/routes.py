@@ -24,16 +24,8 @@ def index():
         # standard to respond to a POST submission to redirect, helps mitigate
         # refresh command in web browsers.
         return redirect(url_for('index'))
-    posts = [
-        {
-            'author': {'username': 'John'},
-            'body': 'Beautiful day in Portland!'
-        },
-        {
-            'author': {'username': 'Susan'},
-            'body': 'The Avengers movie was so cool!'
-        }
-    ]
+    # return list of all posts that current_user follows.
+    posts = current_user.followed_posts().all()
     return render_template('index.html', title='Home Page', form=form,
                            posts=posts)
 
@@ -192,3 +184,14 @@ def unfollow(username):
     db.session.commit()
     flash('You are not following {}.'.format(username))
     return redirect(url_for('user', username=username))
+
+##
+# @name: explore
+# @desc: a view that shows all the recent posts made by users. 'index.html'
+#   is still used as the template but form is redacted.
+##
+@app.route('/explore')
+@login_required
+def explore():
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
+    return render_template('index.html', title='Explore', posts=posts)
