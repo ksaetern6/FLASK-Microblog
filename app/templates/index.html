@@ -20,9 +20,4 @@
         {% include '_post.html' %}
     {% endfor %}
 
-    {% for post in posts %}
-    <p>
-    {{ post.author.username }} says: <b>{{ post.body }}</b>
-    </p>
-    {% endfor %}
 {% endblock %}
