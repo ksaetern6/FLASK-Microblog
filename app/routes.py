@@ -1,64 +1,78 @@
 from flask import render_template, flash, redirect, url_for, request
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User
+from app.models import User, Post
 from werkzeug.urls import url_parse
 from datetime import datetime
 
-#decarators -modifies the function that follows it
-#@app.route creates an association between the URL given as
-#an argument and the function.
 
-@app.route('/')
-@app.route('/index')
+# decorators -modifies the function that follows it
+# @app.route creates an association between the URL given as
+# an argument and the function.
+
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
-    user = {'username': 'Miguel'}
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(body=form.post.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Your post is now live!')
+        # standard to respond to a POST submission to redirect, helps mitigate
+        # refresh command in web browsers.
+        return redirect(url_for('index'))
     posts = [
         {
-            'author':{'username':'John'},
-            'body':'Beautiful day in Portland!'
+            'author': {'username': 'John'},
+            'body': 'Beautiful day in Portland!'
         },
         {
-            'author':{'username':'Susan'},
-            'body':'The Avengers movie was so cool!'
+            'author': {'username': 'Susan'},
+            'body': 'The Avengers movie was so cool!'
         }
     ]
-    return render_template('index.html', title='Home Page',  posts=posts)
+    return render_template('index.html', title='Home Page', form=form,
+                           posts=posts)
+
+
 ##
 # login view
 # 
 ##
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    #if user is already logged in they cannot access the login page again
+    # if user is already logged in they cannot access the login page again
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    #loading login form
+    # loading login form
     form = LoginForm()
     #
     if form.validate_on_submit():
-        #result of filter_by is a query that includes the object 
-        #matching the username, first() returns the first from the query
-        #because its either 1 or 0 results.
+        # result of filter_by is a query that includes the object
+        # matching the username, first() returns the first from the query
+        # because its either 1 or 0 results.
         user = User.query.filter_by(username=form.username.data).first()
-        #if query matches no users or if password is invalid
+        # if query matches no users or if password is invalid
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('login'))
-        #if user & password are correct login the user.
+        # if user & password are correct login the user.
         login_user(user, remember=form.remember_me.data)
-        #next_page is stored in the URL to redirect back to the original page 
-        #after logging in.
+        # next_page is stored in the URL to redirect back to the original page
+        # after logging in.
         next_page = request.args.get('index')
-        #url_parse and netloc is used to determine if the url is relative
-        #absolute so the user stays in the same site as the application.
+        # url_parse and netloc is used to determine if the url is relative
+        # absolute so the user stays in the same site as the application.
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('index')
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form)
-## 
+
+
+##
 #
 #
 ##
@@ -75,6 +89,8 @@ def register():
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
+
+
 ##
 # @name: logout
 # @desc: logs user out
@@ -84,11 +100,12 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+
 ##
 # @name: user
 # @desc: the user's profile page
 ##
-@app.route('/user/<username>') #< > is dynamic for Flask.
+@app.route('/user/<username>')  # < > is dynamic for Flask.
 @login_required
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
@@ -97,6 +114,8 @@ def user(username):
         {'author': user, 'body': 'Test post #2'}
     ]
     return render_template('user.html', user=user, posts=posts)
+
+
 ##
 # @name: before_request
 # @desc: method executes before the view function
@@ -104,10 +123,11 @@ def user(username):
 @app.before_request
 def before_request():
     if current_user.is_authenticated:
-        #current_user grabs the user from the db into the current db session so
+        # current_user grabs the user from the db into the current db session so
         # we don't need to to db.sesson.add().
         current_user.last_seen = datetime.utcnow()
         db.session.commit()
+
 
 ##
 # @name: edit_profile
@@ -117,7 +137,7 @@ def before_request():
 @login_required
 def edit_profile():
     form = EditProfileForm(current_user.username)
-    # if form returns True, data gets transffered into the user object and 
+    # if form returns True, data gets transferred into the user object and
     # saved into the db
     if form.validate_on_submit():
         current_user.username = form.username.data
@@ -129,9 +149,10 @@ def edit_profile():
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.about_me.data = current_user.about_me
-    #if a POST but data is invalid rerender the template with failed validation
+    # if a POST but data is invalid rerender the template with failed validation
     return render_template('edit_profile.html', title='Edit Profile',
-                            form=form)
+                           form=form)
+
 
 ##
 # @name: follow
@@ -151,6 +172,7 @@ def follow(username):
     db.session.commit()
     flash('You are following {}!'.format(username))
     return redirect(url_for('user', username=username))
+
 
 ##
 # @name: unfollow
