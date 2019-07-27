@@ -1,8 +1,10 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import db, login
+from app import db, login, app
 from flask_login import UserMixin
 from hashlib import md5
+from time import time
+import jwt
 
 ##
 # @desc: Followers Association Table, not declared as a model because
@@ -111,6 +113,33 @@ class User(UserMixin, db.Model):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
             digest, size)
+
+    ##
+    # @name: get_reset_password_token
+    # @desc: generates JWT token as a string and returns it.
+    ##
+    def get_reset_password_token(self, expires_in=600):
+        return jwt.encode(
+            {'reset_password': self.id, 'exp': time() + expires_in},
+            app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+
+    # decode necessary because encode() returns token as a byte sequence, we want it as a string.
+
+    ##
+    # @name: verify_reset_password_token
+    # @desc: staticmethod that can be invoked directly from the class. Method takes a token object and
+    #   decodes it. If it cannot be validated or expired and an exception through the try catch is raised
+    #   and returns None. Else the id of the user from the token is grabbed from the db and returned.
+    ##
+    @staticmethod
+    def verify_reset_password_token(token):
+        try:
+            id = jwt.decode(token, app.config['SECRET_KEY'],
+                            algorithms=['HS256'])['reset_password']
+        except:
+            return
+
+        return User.query.get(id)
 
     # tells Python how to print objects of this class, for debugging.
     def __repr__(self):

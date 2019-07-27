@@ -6,6 +6,7 @@ from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+from flask_mail import Mail
 
 app = Flask(__name__)
 # Flask reading config file
@@ -25,6 +26,11 @@ migrate = Migrate(app, db)
 login = LoginManager(app)
 # view to require users to login to view a page
 login.login_view = 'login'
+
+##
+# Flask-Mail
+##
+mail = Mail(app)
 
 ##
 # ERROR_HANDLING using env variables
