@@ -1,17 +1,29 @@
 from flask_mail import Message
 from app import mail, app
 from flask import render_template
+from threading import Thread
+
+
+##
+# @name: send_async_email
+# @desc: send email asynchronously
+##
+def send_async_email(app,msg):
+    # makes application instance accessible via the current_app variable from Flask
+    with app.app_context():
+        mail.send(msg)
 
 
 ##
 # @name: send_email
-# @desc: takes in parameters and converts them into a Message and sends the message using flask_mail
+# @desc: takes in parameters and converts them into a Message and sends the message using flask_mail.
+#   updated to now create a separate thread and send the email asynchronously using send_async_email
 ##
 def send_email(subject, sender, recipients, text_body, html_body):
     msg = Message(subject, sender=sender, recipients=recipients)
     msg.body = text_body
     msg.html = html_body
-    mail.send(msg)
+    Thread(target=send_async_email, args=(app, msg)).start()
 
 
 ##
@@ -27,3 +39,4 @@ def send_password_reset_email(user):
                                          user=user, token=token),
                html_body=render_template('email/reset_password.html',
                                          user=user, token=token))
+
