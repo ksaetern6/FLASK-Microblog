@@ -36,6 +36,12 @@
     </nav>
 {% endblock %}
 
+<!-- JS imports, super() preserves the content of the base template.-->
+{% block scripts %}
+    {{ super() }}
+    {{ moment.include_moment() }}
+{% endblock %}
+
 <!-- top-level container that renders flashed messages in Bootstrap style -->
 {% block content %}
     <div class="container">

@@ -8,7 +8,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_bootstrap import Bootstrap
-
+from flask_moment import Moment
 
 app = Flask(__name__)
 # Flask reading config file
@@ -38,6 +38,11 @@ mail = Mail(app)
 # Flask-Bootstrap
 ##
 bootstrap = Bootstrap(app)
+
+##
+# flask-moment
+##
+moment = Moment(app)
 
 
 ##
