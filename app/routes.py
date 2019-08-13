@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for, request, g
 from app import app, db
 from app.forms import (LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm,
                        ResetPasswordForm,
@@ -8,6 +8,7 @@ from app.models import User, Post
 from werkzeug.urls import url_parse
 from datetime import datetime
 from app.email import send_password_reset_email
+from flask_babel import get_locale
 
 
 # decorators -modifies the function that follows it
@@ -81,8 +82,8 @@ def login():
 
 
 ##
-#
-#
+# @name: register
+# @desc:
 ##
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -143,6 +144,9 @@ def before_request():
         # we don't need to to db.sesson.add().
         current_user.last_seen = datetime.utcnow()
         db.session.commit()
+    # get_locale returns locale object, then converted to a string so we'll have
+    # the language code.
+    g.locale = str(get_locale())
 
 
 ##
