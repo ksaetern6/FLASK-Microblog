@@ -52,12 +52,12 @@ moment = Moment(app)
 babel = Babel(app)
 
 
-@babel.localselector
+@babel.localeselector
 def get_locale():
     # reads in the accept-language request header and configures best language to use based on weight
     # and availability
-    return request.accept_languages.best_match(app.config['LANGUAGES'])
-
+    #return request.accept_languages.best_match(app.config['LANGUAGES'])
+    return 'es'
 
 ##
 # ERROR_HANDLING using env variables
