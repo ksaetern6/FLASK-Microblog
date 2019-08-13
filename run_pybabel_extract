@@ -1,4 +1,4 @@
- pybabel extract -F babel.cfg -k _l -o messages.pot .
+$ pybabel extract -F babel.cfg -k _l -o messages.pot .
 
 "pybabel extract" reads config file using -F and scans directories given the config sources
 starting '.' which is the current directory.
@@ -9,9 +9,24 @@ starting '.' which is the current directory.
 messages.pot can easily be regenerated anytime.
 
 =============================
-pybabel init -i messages.pot -d app/translations -l es
+$ pybabel init -i messages.pot -d app/translations -l es
 
 "pybabel init" takes in messages.pot as input and writes a new language catalog
 into given directory "-d" with specified language "-l"
 
 run the given command with a new given language to make another repo
+
+============================
+$ pybabel compile -d app/translations
+
+adds a 'messages.mo' file next to each 'messages.po' in each language directory
+.mo file is used by Flask-Babel to load translations for the application
+
+============================
+$ pybabel extract -F babel.cfg -k _l -o messages.pot .
+$ pybabel update -i messages.pot -d app/translations
+
+'extract' generates a new version of 'messages.pot' with all previous text and new
+that are now wrapped in _() or _l()
+
+'update' takes the new 'messages.pot' and merges it into 'messages.po'
