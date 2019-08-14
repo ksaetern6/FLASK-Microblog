@@ -16,6 +16,14 @@
                 {{ _('%(username)s said %(when)s',
                     username=user_link, when=moment(post.timestamp).fromNow()) }}
                 <br>
+
+                <!-- translate button, only appears if language is detected and if
+                  language does not match language selected by function decorator localeselector -->
+                {%  if post.language and post.language != g.locale %}
+                <br><br>
+                <a href="#">{{ _('Translate') }}</a>
+                {% endif %}
+
                 {{ post.body }}
             </td>
         </tr>

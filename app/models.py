@@ -149,7 +149,7 @@ class User(UserMixin, db.Model):
 ##
 # @type class
 # @name Post
-# @desc blog posts written by users
+# @desc blog posts written by users with 5 columns
 ##
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -157,6 +157,8 @@ class Post(db.Model):
     # default lets SQLAlchemy set the field to the value of calling that function.
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    language = db.Column(db.String(5))
 
     def __repr__(self):
         return 'Post {}>'.format(self.body)

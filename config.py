@@ -28,5 +28,11 @@ class Config(object):
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')  # password
     ADMINS = ['kensdevacc@gmail.com']  # emails receiving errors
 
-    #Pagination
+    # Pagination
     POSTS_PER_PAGE = 3
+
+    # l18n & L10n
+    LANGUAGES = ['en', 'es', 'fr']
+
+    # Azure Translator Key
+    MS_TRANSLATOR_KEY = os.environ.get('MS_TRANSLATOR_KEY')
