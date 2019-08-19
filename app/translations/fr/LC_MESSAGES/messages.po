@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-08-13 00:21-0700\n"
+"POT-Creation-Date: 2019-08-19 00:01-0700\n"
 "PO-Revision-Date: 2019-08-13 00:20-0700\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -24,6 +24,14 @@ msgstr ""
 
 #: app/forms.py:18
 msgid "Username"
+msgstr ""
+
+#: app/translate.py:16
+msgid "Error: the translation service is not configured."
+msgstr ""
+
+#: app/translate.py:28
+msgid "Error: the translation service failed."
 msgstr ""
 
 #: app/templates/404.html:4
@@ -45,6 +53,10 @@ msgstr ""
 #: app/templates/_post.html:16
 #, python-format
 msgid "%(username)s said %(when)s"
+msgstr ""
+
+#: app/templates/_post.html:30
+msgid "Translate"
 msgstr ""
 
 #: app/templates/base.html:5
@@ -69,6 +81,10 @@ msgstr ""
 
 #: app/templates/base.html:31
 msgid "Logout"
+msgstr ""
+
+#: app/templates/base.html:64
+msgid "Error: Could not contact server."
 msgstr ""
 
 #: app/templates/edit_profile.html:5

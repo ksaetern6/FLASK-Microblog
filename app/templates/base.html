@@ -42,6 +42,29 @@
     {{ super() }}
     {{ moment.include_moment() }}
     {{ moment.lang(g.locale) }}
+
+    <!-- @desc:
+    takes in 4 parameters, unique IDs for the post and translate link and the
+        language codes for the source language and destination language.
+    '$(destElem).html() replaces translation link with static loading file.'
+    '$.post()' sends POST request to /translate URL; takes in a url to request
+        to and then a dictionary with three data items
+    '.done()' is a successful callback while '.fail()' is a failed callback with an error.
+        -->
+    <script>
+        function translate(sourceElem, destElem, sourceLang, destLang) {
+            $(destElem).html('<img src="{{ url_for('static', filename='loading.gif') }}">');
+            $.post('/translate', {
+                text: $(sourceElem).text(),
+                source_language: sourceLang,
+                dest_language: destLang
+            }).done(function(response) {
+                $(destElem).text(response['text'])
+            }).fail(function() {
+                $(destElem).text("{{ _('Error: Could not contact server.') }}");
+            });
+        }
+    </script>
 {% endblock %}
 
 <!-- top-level container that renders flashed messages in Bootstrap style -->

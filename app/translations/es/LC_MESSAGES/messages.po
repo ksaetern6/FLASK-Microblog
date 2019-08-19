@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-08-13 00:21-0700\n"
+"POT-Creation-Date: 2019-08-19 00:01-0700\n"
 "PO-Revision-Date: 2017-09-29 23:25-0700\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
@@ -25,6 +25,14 @@ msgstr ""
 #: app/forms.py:18
 msgid "Username"
 msgstr "Nombre de usuario"
+
+#: app/translate.py:16
+msgid "Error: the translation service is not configured."
+msgstr ""
+
+#: app/translate.py:28
+msgid "Error: the translation service failed."
+msgstr ""
 
 #: app/templates/404.html:4
 msgid "Not Found"
@@ -46,6 +54,10 @@ msgstr "El administrador ha sido notificado. ¡Lamentamos la inconveniencia!"
 #, python-format
 msgid "%(username)s said %(when)s"
 msgstr "%(username)s dijo %(when)s"
+
+#: app/templates/_post.html:30
+msgid "Translate"
+msgstr ""
 
 #: app/templates/base.html:5
 msgid "Welcome to Microblog"
@@ -70,6 +82,10 @@ msgstr "Perfil"
 #: app/templates/base.html:31
 msgid "Logout"
 msgstr "Salir"
+
+#: app/templates/base.html:64
+msgid "Error: Could not contact server."
+msgstr ""
 
 #: app/templates/edit_profile.html:5
 msgid "Edit Profile"

@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, url_for, request, g
+from flask import render_template, flash, redirect, url_for, request, g, jsonify
 from app import app, db
 from app.forms import (LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm,
                        ResetPasswordForm,
@@ -10,6 +10,7 @@ from datetime import datetime
 from app.email import send_password_reset_email
 from flask_babel import get_locale
 from guess_language import guess_language
+from app.translate import translate
 
 
 # decorators -modifies the function that follows it
@@ -281,3 +282,16 @@ def reset_password(token):
         return redirect(url_for('login'))
     return render_template('reset_password.html', form=form)
 
+
+##
+# @name: translate_text
+# @desc: returns translated text in JSON format.
+#       Implemented as a POST request, request.form attribute has all the data included
+#       in the submission.
+##
+@app.route('/translate', methods=['POST'])
+@login_required
+def translate_text():
+    return jsonify({'text': translate(request.form['text'],
+                                      request.form['source_language'],
+                                      request.form['dest_language'])})
