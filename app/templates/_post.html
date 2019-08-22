@@ -19,9 +19,11 @@
                     username=user_link, when=moment(post.timestamp).fromNow()) }}
                 <br>
 
+                 <span id="post{{ post.id }}">{{ post.body }}</span>
+
                 <!-- translate button, only appears if language is detected and if
                   language does not match language selected by function decorator localeselector -->
-                {%  if post.language and post.language != g.locale %}
+
                 <br><br>
                     <!-- Call to translate function with passed html elements -->
                 <span id="translation{{ post.id }}">
@@ -31,9 +33,7 @@
                                 '{{ post.language }}',
                                 '{{ g.locale }}');">{{ _('Translate') }}</a>
                 </span>
-                {% endif %}
 
-                <span id="post{{ post.id }}">{{ post.body }}</span>
             </td>
         </tr>
     </table>
