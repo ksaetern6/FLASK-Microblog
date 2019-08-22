@@ -1,20 +1,40 @@
+#!/usr/bin/env python
 from datetime import datetime, timedelta
 import unittest
-from app import app, db
+from app import create_app, db
 from app.models import User, Post
+from config import Config
+
+
+# subclass of app's Config class and overriding SQLAlchemy config to use in-memory SQLite db.
+# testing is set to True in case unit testing is not enabled.
+class TestConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite://'
+
 
 class UserModelCase(unittest.TestCase):
+    ##
+    # @name setUp
+    # @desc: Setup database for unit testing.
+    #   creates app from TestConfig class and uses creates the context from the newly
+    #   created app and pushes the context to be used. This is so db.create_all() now has
+    #   a context to find the database URI for the testing.
+    ##
     def setUp(self):
-        #creates db just for unit testing. Uses in-memory SQLite db during 
-        #tests
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
-        
-        #creates all the database tables.
+        self.app = create_app(TestConfig)
+        self.app_context = self.app.app_context()
+        self.app_context.push()
         db.create_all()
 
+    ##
+    # @name: tearDown
+    # @desc: resets everything to clean state by popping the context.
+    ##
     def tearDown(self):
         db.session.remove()
         db.drop_all()
+        self.app_context.pop()
 
     def test_password_hashing(self):
         u = User(username='susan')
@@ -52,14 +72,14 @@ class UserModelCase(unittest.TestCase):
         self.assertEqual(u2.followers.count(), 0)
 
     def test_follow_posts(self):
-        #create four users
+        # create four users
         u1 = User(username='john', email='john@example.com')
         u2 = User(username='susan', email='susan@example.com')
         u3 = User(username='mary', email='mary@example.com')
         u4 = User(username='david', email='david@example.com')
         db.session.add_all([u1, u2, u3, u4])
 
-        #create four posts
+        # create four posts
         now = datetime.utcnow()
         p1 = Post(body="post from john", author=u1,
                   timestamp=now + timedelta(seconds=1))
@@ -72,14 +92,14 @@ class UserModelCase(unittest.TestCase):
         db.session.add_all([p1, p2, p3, p4])
         db.session.commit()
 
-        #setup the followers
-        u1.follow(u2)
-        u1.follow(u4)
-        u2.follow(u3)
-        u3.follow(u4)
+        # setup the followers
+        u1.follow(u2)  # john follows susan
+        u1.follow(u4)  # john follows david
+        u2.follow(u3)  # susan follows mary
+        u3.follow(u4)  # mary follows david
         db.session.commit()
 
-        #check the followed posts of each other
+        # check the followed posts of each user
         f1 = u1.followed_posts().all()
         f2 = u2.followed_posts().all()
         f3 = u3.followed_posts().all()
@@ -88,6 +108,7 @@ class UserModelCase(unittest.TestCase):
         self.assertEqual(f2, [p2, p3])
         self.assertEqual(f3, [p3, p4])
         self.assertEqual(f4, [p4])
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -1,6 +1,9 @@
 import os
+from dotenv import load_dotenv
+
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(os.path.join(basedir, '.env'))
 
 
 # As app needs more configuration items, they can be added to this class.
@@ -32,7 +35,7 @@ class Config(object):
     POSTS_PER_PAGE = 3
 
     # l18n & L10n
-    LANGUAGES = ['en', 'es', 'fr']
+    LANGUAGES = ['en', 'es']
 
     # Azure Translator Key
     MS_TRANSLATOR_KEY = os.environ.get('MS_TRANSLATOR_KEY')

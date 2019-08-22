@@ -1,7 +1,7 @@
     <table class="table table-hover">
         <tr>
             <td width="70px">
-                <a href="{{ url_for('user', username=post.author.username) }}">
+                <a href="{{ url_for('main.user', username=post.author.username) }}">
                     <img src="{{ post.author.avatar(70) }}" />
                 </a>
             </td>
@@ -9,7 +9,7 @@
                 <!-- set & endset directives create intermediate variable named user_link
                  which are passed as an argument to translation function -->
                 {% set user_link %}
-                    <a href="{{ url_for('user', username=post.author.username) }}">
+                    <a href="{{ url_for('main.user', username=post.author.username) }}">
                         {{ post.author.username }}
                     </a>
                 {% endset %}
@@ -26,14 +26,16 @@
 
                 <br><br>
                     <!-- Call to translate function with passed html elements -->
+                {% if post.language and post.language != g.locale %}
                 <span id="translation{{ post.id }}">
                     <a href="javascript:translate(
+                                '#post{{ post.id }}',
                                 '#post{{ post.id }}',
                                 '#translation{{ post.id }}',
                                 '{{ post.language }}',
                                 '{{ g.locale }}');">{{ _('Translate') }}</a>
                 </span>
-
+                {% endif %}
             </td>
         </tr>
     </table>
