@@ -32,7 +32,7 @@ class Config(object):
     ADMINS = ['kensdevacc@gmail.com']  # emails receiving errors
 
     # Pagination
-    POSTS_PER_PAGE = 3
+    POSTS_PER_PAGE = 4
 
     # l18n & L10n
     LANGUAGES = ['en', 'es']
