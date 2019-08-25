@@ -4,6 +4,7 @@ from app import db, login
 from flask_login import UserMixin
 from hashlib import md5
 from time import time
+from app.search import add_to_index, remove_from_index, query_index
 from flask import current_app
 import jwt
 
@@ -122,7 +123,7 @@ class User(UserMixin, db.Model):
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
             {'reset_password': self.id, 'exp': time() + expires_in},
-            app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+            current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
     # decode necessary because encode() returns token as a byte sequence, we want it as a string.
 
@@ -135,7 +136,7 @@ class User(UserMixin, db.Model):
     @staticmethod
     def verify_reset_password_token(token):
         try:
-            id = jwt.decode(token, app.config['SECRET_KEY'],
+            id = jwt.decode(token, current_app.config['SECRET_KEY'],
                             algorithms=['HS256'])['reset_password']
         except:
             return
@@ -149,10 +150,101 @@ class User(UserMixin, db.Model):
 
 ##
 # @type class
+# @name SearchableMixin
+# @desc
+##
+class SearchableMixin(object):
+    # @classmethod is a special method associated with the class, not a particular instance,
+    # does not need creation of class instance to call classmethod
+    # 'self' renamed to 'cls' so the method receives a class and not an instance as its first argument
+    # ex: 'Post.search()' w/o instance of Post object
+
+    ##
+    # @name: search
+    # @para: cls, expression, page, per_page
+    #   cls: class
+    #   expression: what to query
+    #   page: page number
+    #   per_page: how many per page
+    # @desc: wraps query_index() to replace list of object IDs with actual objects.
+    ##
+    @classmethod
+    def search(cls, expression, page, per_page):
+        # cls.__tablename__ = Flask-SQLAlchemy relational table name
+        #  ids = list of result IDs & total = total number of results
+        ids, total = query_index(cls.__tablename__, expression, page, per_page)
+        if total == 0:
+            return cls.query.filter_by(id=0), 0
+
+        when = []
+        for i in range(len(ids)):
+            when.append((ids[i], i))
+
+        # db.case() is used to retrieve a list of objects by their id.
+        return cls.query.filter(cls.id.in_(ids)).order_by(
+            db.case(when, value=cls.id)), total
+
+    ##
+    # @name: before_commit
+    # @para: cls, session
+    #   cls: class
+    #   session: session from SQLAlchemy during a commit
+    # @desc: respond to SQLAlchemy before a commit, used to figure out what objects are
+    #   going to be added(add), modified(update), or deleted(delete)
+    #   saved to session._changes so objects will survive the commit process and use to update elasticsearch
+    ##
+    @classmethod
+    def before_commit(cls, session):
+        session._changes = {
+            'add': list(session.new),
+            'update': list(session.dirty),
+            'delete': list(session.deleted)
+        }
+
+    ##
+    # @name: after_commit
+    # @para: cls, session
+    #   cls: class
+    #   session: session from SQLAlchemy during a commit
+    # @desc: respond to SQLAlchemy after commit. Used to make changes to Elasticsearch side
+    #   uses session._changes side created before_commit()
+    ##
+    @classmethod
+    def after_commit(cls, session):
+        for obj in session._changes['add']:
+            if isinstance(obj, SearchableMixin):
+                add_to_index(obj.__tablename__, obj)
+        # add_to_index updates a doc if the model_id is the same
+        for obj in session._changes['update']:
+            if isinstance(obj, SearchableMixin):
+                add_to_index(obj.__tablename__, obj)
+        for obj in session._changes['delete']:
+            if isinstance(obj, SearchableMixin):
+                remove_from_index(obj.__tablename__, obj)
+        session._changes = None
+
+    ##
+    # @name: reindex
+    # @desc: helper method used to add all posts in the db to the search index
+    ##
+    @classmethod
+    def reindex(cls):
+        for obj in cls.query:
+            add_to_index(cls.__tablename__, obj)
+
+
+# set up event handlers to SQLAlchemy's db.event.listen() to know when there's a commit
+db.event.listen(db.session, 'before_commit', SearchableMixin.before_commit)
+db.event.listen(db.session, 'after_commit', SearchableMixin.after_commit)
+
+
+##
+# @type class
 # @name Post
 # @desc blog posts written by users with 5 columns
+#   SearchableMixin is a Mixin class for Post.
 ##
-class Post(db.Model):
+class Post(SearchableMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.String(140))
     # default lets SQLAlchemy set the field to the value of calling that function.

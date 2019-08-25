@@ -9,7 +9,6 @@ from flask import current_app
 #   Properties = col
 
 
-
 ##
 # @name: add_to_index()
 # @para: index, model
