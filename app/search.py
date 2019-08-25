@@ -59,12 +59,8 @@ def query_index(index, query, page, per_page):
     # multi_match is used to search multiple fields, field is set to '*' to search all fields
     search = current_app.elasticsearch.search(
         index=index,
-        body={'query':
-                  {'multi_match':
-                       {'query': query,
-                        'fields': ['*']}},
-              'from': (page - 1) * per_page,
-              'size': per_page})
+        body={'query': {'multi_match': {'query': query, 'fields': ['*']}},
+              'from': (page - 1) * per_page, 'size': per_page})
 
     # uses Python list comprehension to extract 'id' values from the larger elasticsearch results
     #  ids = for 'hit' in 'search:

@@ -26,7 +26,7 @@
 
                 <br><br>
                     <!-- Call to translate function with passed html elements -->
-
+                {% if post.language and post.language != g.locale %}
                 <span id="translation{{ post.id }}">
                     <a href="javascript:translate(
                                 '#post{{ post.id }}',
@@ -34,7 +34,7 @@
                                 '{{ post.language }}',
                                 '{{ g.locale }}');">{{ _('Translate') }}</a>
                 </span>
-
+                {% endif %}
             </td>
         </tr>
     </table>

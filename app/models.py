@@ -245,6 +245,10 @@ db.event.listen(db.session, 'after_commit', SearchableMixin.after_commit)
 #   SearchableMixin is a Mixin class for Post.
 ##
 class Post(SearchableMixin, db.Model):
+    # class attribute that lists fields that can be searched by elasticsearch
+    # In this case, it's 'body'
+    __searchable__ = ['body']
+
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.String(140))
     # default lets SQLAlchemy set the field to the value of calling that function.
@@ -252,10 +256,6 @@ class Post(SearchableMixin, db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     language = db.Column(db.String(5))
-
-    # class attribute that lists fields that can be searched by elasticsearch
-    # In this case, it's 'body'
-    __searchable__ = ['body']
 
     def __repr__(self):
         return 'Post {}>'.format(self.body)
